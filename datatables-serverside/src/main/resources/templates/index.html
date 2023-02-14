@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.2/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.2/js/jquery.dataTables.min.js"></script>
+</head>
+<body>
+
+    <form th:object="${productSearch}" method="post">
+
+        <input type="hidden" th:field="*{draw}">
+        <input type="hidden" th:field="*{length}">
+        <input type="hidden" th:field="*{start}">
+        <input type="hidden" th:field="*{sortColumn}">
+        <input type="hidden" th:field="*{sortDirection}">
+        <!-- <input type="hidden" th:field="*{sortTable}"> -->
+
+        <table id="dataTable" class="table">
+            <thead>
+                <tr>
+                    <th th:class="text-center">상품번호</th>
+                    <th th:class="text-center">카테고리</th>
+                    <th th:class="text-center">제조사</th>
+                    <th th:class="text-center">제품명</th>
+                    <th th:class="text-center">가격</th>
+                    <th th:class="text-center">재고</th>
+                    <th th:class="text-center">등록일</th>
+                </tr>
+            </thead>
+        </table>
+    </form>
+
+</body>
+<script>
+
+    $(document).ready(function() {
+        getProductList()
+    });
+
+    function getProductList() {
+
+        $('#dataTable').DataTable({
+
+            serverSide : true,
+            paging : true,
+            destroy : true,
+            deferRender : true,
+            dom : "<'row'<'col-sm-12 col-md-6'i><'col-sm-12 col-md-6'l>>" +
+                 "<'row'<'col-sm-12't>>" +
+                 "<'row justify-content-center'<'col-auto'p>>",
+            ajax : {
+                url : "/product/list-data",
+                type : "post",
+                data : function(table){
+
+                    let orderCol = table.order[0].column;
+                    let sortCol = table.columns[orderCol].data;
+                    let sortDir = table.order[0].dir;
+
+                    $('#draw').val(table.draw);
+                    $('#length').val(table.length);
+                    $('#start').val(table.start);
+                    $('#sortColumn').val(sortCol);
+                    $('#sortDirection').val(sortDir);
+                    // $('#sortTable').val("");
+                    return $("form").serialize();
+                },
+                dataType :"json",
+                dataSrc : function (res) {
+                    return res.data;
+                }
+            },
+            buttons : [
+            ],
+            columns: [
+                {data : 'id'},
+                {data : 'category'},
+                {data : 'provider'},
+                {data : 'name'},
+                {data : 'price'},
+                {data : 'stock'},
+                {data : 'createdDate'},
+            ],
+            columnDefs: [
+                {
+                    targets: [0, 1, 2, 3, 4, 5, 6],
+                    className: "text-center",
+                }
+            ],
+            order : [
+                [6, "desc"]
+            ],
+            scrollCollapse : false,
+            pagingType : "full_numbers"
+
+        });
+
+    }
+
+</script>
+</html>
